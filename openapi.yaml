@@ -1,0 +1,1538 @@
+openapi: 3.0.3
+info:
+  title: Онлайн сургалтын API
+  version: 1.0.0
+  description: "BED411 бие даалт. Оюутны кодын сүүлийн цифр 1: Category, Instructor, Course, Lesson.
+    21 domain endpoint. Бүх жагсаалт data/meta хэлбэртэй. Бүх алдаа message болон шаардлагатай үед
+    field талбартай. Үл мэдэгдэх эсвэл давтагдсан query параметр 400. Жилийн дээд хязгаарыг сервер
+    ажиллаж буй оноор тооцно: year нь ирэх он хүртэл, birthYear нь энэ он хүртэл."
+servers:
+  - url: /
+    description: Одоогийн сервер; /docs дээр Try it out шууд ажиллана.
+tags:
+  - name: Categories
+    description: Сургалтын ангилал
+  - name: Instructors
+    description: Багш
+  - name: Courses
+    description: Сургалт
+  - name: Lessons
+    description: Хичээл
+paths:
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Category жагсаах
+      operationId: listCategories
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryList"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+    post:
+      tags:
+        - Categories
+      summary: Category нэмэх
+      operationId: createCategory
+      responses:
+        "201":
+          description: Үүсгэлээ.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "409":
+          description: Давхардсан утга эсвэл устгахыг хориглосон холбоос.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Conflicting data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreate"
+            example:
+              name: Программчлал
+  /categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Category дэлгэрэнгүй
+      operationId: getCategory
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryDetail"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+    patch:
+      tags:
+        - Categories
+      summary: Category хэсэгчлэн засах
+      operationId: updateCategory
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+        "409":
+          description: Давхардсан утга эсвэл устгахыг хориглосон холбоос.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Conflicting data.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+            example:
+              name: Веб хөгжүүлэлт
+      description: Зөвхөн ирсэн талбарыг засна. Хоосон объект, үл мэдэгдэх талбар, зайнаас бүрдсэн
+        текстийг 400 болгоно.
+    delete:
+      tags:
+        - Categories
+      summary: Category устгах
+      operationId: deleteCategory
+      responses:
+        "204":
+          description: Амжилттай устгалаа. Body хоосон.
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+        "409":
+          description: Давхардсан утга эсвэл устгахыг хориглосон холбоос.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Conflicting data.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      description: Сургалттай ангиллыг устгахгүй (Restrict), 409 буцаана.
+  /instructors:
+    get:
+      tags:
+        - Instructors
+      summary: Instructor жагсаах
+      operationId: listInstructors
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstructorList"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+    post:
+      tags:
+        - Instructors
+      summary: Instructor нэмэх
+      operationId: createInstructor
+      responses:
+        "201":
+          description: Үүсгэлээ.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instructor"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstructorCreate"
+            example:
+              name: Б. Тэмүүлэн
+              birthYear: 1988
+  /instructors/{id}:
+    get:
+      tags:
+        - Instructors
+      summary: Instructor дэлгэрэнгүй
+      operationId: getInstructor
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstructorDetail"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+    patch:
+      tags:
+        - Instructors
+      summary: Instructor хэсэгчлэн засах
+      operationId: updateInstructor
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instructor"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstructorPatch"
+            example:
+              birthYear: 1990
+      description: Зөвхөн ирсэн талбарыг засна. Хоосон объект, үл мэдэгдэх талбар, зайнаас бүрдсэн
+        текстийг 400 болгоно.
+    delete:
+      tags:
+        - Instructors
+      summary: Instructor устгах
+      operationId: deleteInstructor
+      responses:
+        "204":
+          description: Амжилттай устгалаа. Body хоосон.
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      description: Багш устахад сургалтууд үлдэж instructorId null болно (SetNull).
+  /courses:
+    get:
+      tags:
+        - Courses
+      summary: Course жагсаах
+      operationId: listCourses
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseList"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: \S
+          description: title эсвэл description дотор хайна. Үсгийн том, жижиг ялгахгүй.
+          example: javascript
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
+        - name: instructorId
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
+        - name: hasInstructor
+          in: query
+          schema:
+            type: boolean
+          description: false бол багшгүй сургалтууд; зөвхөн true/false.
+        - name: minYear
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1900
+            maximum: 2027
+          description: minYear <= maxYear байх ёстой.
+        - name: maxYear
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1900
+            maximum: 2027
+        - name: isPublished
+          in: query
+          schema:
+            type: boolean
+          description: Зөвхөн true эсвэл false.
+        - name: minRating
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+          description: "Нэмэлт: хичээлийн үнэлгээний дундаж энэ утгаас багагүй сургалтууд."
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - title
+              - year
+              - durationMin
+              - createdAt
+            default: createdAt
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+    post:
+      tags:
+        - Courses
+      summary: Course нэмэх
+      operationId: createCourse
+      responses:
+        "201":
+          description: Үүсгэлээ.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseCreate"
+            example:
+              title: JavaScript суурь
+              year: 2026
+              durationMin: 180
+              description: Хувьсагч, функц, объектын үндсэн ойлголт.
+              isPublished: true
+              categoryId: 1
+              instructorId: 1
+  /courses/{id}:
+    get:
+      tags:
+        - Courses
+      summary: Course дэлгэрэнгүй
+      operationId: getCourse
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseDetail"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+    patch:
+      tags:
+        - Courses
+      summary: Course хэсэгчлэн засах
+      operationId: updateCourse
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoursePatch"
+            example:
+              description: null
+              isPublished: false
+      description: Зөвхөн ирсэн талбарыг засна. Хоосон объект, үл мэдэгдэх талбар, зайнаас бүрдсэн
+        текстийг 400 болгоно.
+    delete:
+      tags:
+        - Courses
+      summary: Course устгах
+      operationId: deleteCourse
+      responses:
+        "204":
+          description: Амжилттай устгалаа. Body хоосон.
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      description: Сургалт устахад түүний бүх хичээл хамт устна (Cascade).
+  /categories/{id}/courses:
+    get:
+      tags:
+        - Categories
+      summary: Ангиллын сургалтууд
+      operationId: listCategoryCourses
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseList"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - name: q
+          in: query
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: \S
+          description: title эсвэл description дотор хайна. Үсгийн том, жижиг ялгахгүй.
+          example: javascript
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
+        - name: instructorId
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
+        - name: hasInstructor
+          in: query
+          schema:
+            type: boolean
+          description: false бол багшгүй сургалтууд; зөвхөн true/false.
+        - name: minYear
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1900
+            maximum: 2027
+          description: minYear <= maxYear байх ёстой.
+        - name: maxYear
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1900
+            maximum: 2027
+        - name: isPublished
+          in: query
+          schema:
+            type: boolean
+          description: Зөвхөн true эсвэл false.
+        - name: minRating
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+          description: "Нэмэлт: хичээлийн үнэлгээний дундаж энэ утгаас багагүй сургалтууд."
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - title
+              - year
+              - durationMin
+              - createdAt
+            default: createdAt
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      description: Эцэг ангилал байхгүй бол 404. Бусад шүүлтүүрийг хамтад нь хэрэглэнэ.
+  /instructors/{id}/courses:
+    get:
+      tags:
+        - Instructors
+      summary: Багшийн сургалтууд
+      operationId: listInstructorCourses
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseList"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - name: q
+          in: query
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: \S
+          description: title эсвэл description дотор хайна. Үсгийн том, жижиг ялгахгүй.
+          example: javascript
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
+        - name: instructorId
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
+        - name: hasInstructor
+          in: query
+          schema:
+            type: boolean
+          description: false бол багшгүй сургалтууд; зөвхөн true/false.
+        - name: minYear
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1900
+            maximum: 2027
+          description: minYear <= maxYear байх ёстой.
+        - name: maxYear
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1900
+            maximum: 2027
+        - name: isPublished
+          in: query
+          schema:
+            type: boolean
+          description: Зөвхөн true эсвэл false.
+        - name: minRating
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+          description: "Нэмэлт: хичээлийн үнэлгээний дундаж энэ утгаас багагүй сургалтууд."
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - title
+              - year
+              - durationMin
+              - createdAt
+            default: createdAt
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+  /courses/{id}/lessons:
+    get:
+      tags:
+        - Lessons
+      summary: Сургалтын хичээлүүд
+      operationId: listCourseLessons
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonList"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - rating
+              - createdAt
+            default: createdAt
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+    post:
+      tags:
+        - Lessons
+      summary: Сургалтад хичээл нэмэх
+      operationId: createLesson
+      responses:
+        "201":
+          description: Үүсгэлээ.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+        "409":
+          description: Давхардсан утга эсвэл устгахыг хориглосон холбоос.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Conflicting data.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonCreate"
+            example:
+              title: Хувьсагч ба өгөгдлийн төрөл
+              rating: 5
+              comment: Эхний хичээлийн материал.
+              authorName: Б. Тэмүүлэн
+      description: "Бие даалтын C загварын давхардлын дүрмийг хадгалсан: нэг authorName нэг courseId-д нэг
+        л бичлэгтэй. Давхардлыг өгөгдлийн сангийн @@unique хориглоно."
+  /lessons/{id}:
+    patch:
+      tags:
+        - Lessons
+      summary: Хичээл хэсэгчлэн засах
+      operationId: updateLesson
+      responses:
+        "200":
+          description: Амжилттай.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+        "409":
+          description: Давхардсан утга эсвэл устгахыг хориглосон холбоос.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Conflicting data.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonPatch"
+            example:
+              rating: 4
+              comment: Материалыг шинэчлэв.
+    delete:
+      tags:
+        - Lessons
+      summary: Хичээл устгах
+      operationId: deleteLesson
+      responses:
+        "204":
+          description: Амжилттай устгалаа. Body хоосон.
+        "400":
+          description: Буруу ID, query, JSON, body эсвэл foreign key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Invalid value.
+                field: rating
+        "404":
+          description: Хаяг эсвэл өгөгдөл олдсонгүй.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: Resource not found.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          readOnly: true
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - id
+        - name
+        - createdAt
+    Instructor:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          readOnly: true
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        birthYear:
+          type: integer
+          format: int32
+          minimum: 1900
+          maximum: 2026
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - id
+        - name
+        - birthYear
+        - createdAt
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          readOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        rating:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          pattern: \S
+          nullable: true
+        authorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        courseId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - id
+        - title
+        - rating
+        - comment
+        - authorName
+        - courseId
+        - createdAt
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        field:
+          type: string
+          description: Зөвхөн тодорхой талбарт хамаарах алдаанд байна.
+      required:
+        - message
+      additionalProperties: false
+    Meta:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 50
+        total:
+          type: integer
+          minimum: 0
+        pages:
+          type: integer
+          minimum: 0
+      required:
+        - page
+        - limit
+        - total
+        - pages
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          readOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        year:
+          type: integer
+          format: int32
+          minimum: 1900
+          maximum: 2027
+        durationMin:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          pattern: \S
+          nullable: true
+        isPublished:
+          type: boolean
+          default: true
+        categoryId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        instructorId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          $ref: "#/components/schemas/Category"
+        instructor:
+          allOf:
+            - $ref: "#/components/schemas/Instructor"
+          nullable: true
+        _count:
+          type: object
+          properties:
+            lessons:
+              type: integer
+              minimum: 0
+          required:
+            - lessons
+      required:
+        - id
+        - title
+        - year
+        - durationMin
+        - description
+        - isPublished
+        - categoryId
+        - instructorId
+        - createdAt
+        - category
+        - instructor
+        - _count
+    CourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/Course"
+        - type: object
+          properties:
+            averageRating:
+              type: number
+              minimum: 1
+              maximum: 5
+              nullable: true
+              description: Lesson.rating-ийн дундаж; хичээлгүй бол null.
+          required:
+            - averageRating
+    CategoryDetail:
+      allOf:
+        - $ref: "#/components/schemas/Category"
+        - type: object
+          properties:
+            _count:
+              type: object
+              properties:
+                courses:
+                  type: integer
+                  minimum: 0
+              required:
+                - courses
+          required:
+            - _count
+    InstructorDetail:
+      allOf:
+        - $ref: "#/components/schemas/Instructor"
+        - type: object
+          properties:
+            _count:
+              type: object
+              properties:
+                courses:
+                  type: integer
+                  minimum: 0
+              required:
+                - courses
+          required:
+            - _count
+    CategoryList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      required:
+        - data
+        - meta
+    InstructorList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Instructor"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      required:
+        - data
+        - meta
+    CourseList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      required:
+        - data
+        - meta
+    LessonList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      required:
+        - data
+        - meta
+    CategoryCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+      required:
+        - name
+      additionalProperties: false
+      example:
+        name: Программчлал
+    CategoryPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+      additionalProperties: false
+      minProperties: 1
+      example:
+        name: Веб хөгжүүлэлт
+    InstructorCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        birthYear:
+          type: integer
+          format: int32
+          minimum: 1900
+          maximum: 2026
+          nullable: true
+      required:
+        - name
+      additionalProperties: false
+      example:
+        name: Б. Тэмүүлэн
+        birthYear: 1988
+    InstructorPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        birthYear:
+          type: integer
+          format: int32
+          minimum: 1900
+          maximum: 2026
+          nullable: true
+      additionalProperties: false
+      minProperties: 1
+      example:
+        birthYear: 1990
+    CourseCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        year:
+          type: integer
+          format: int32
+          minimum: 1900
+          maximum: 2027
+        durationMin:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          pattern: \S
+          nullable: true
+        isPublished:
+          type: boolean
+          default: true
+        categoryId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        instructorId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          nullable: true
+      required:
+        - title
+        - year
+        - durationMin
+        - categoryId
+      additionalProperties: false
+      example:
+        title: JavaScript суурь
+        year: 2026
+        durationMin: 180
+        description: Хувьсагч, функц, объектын үндсэн ойлголт.
+        isPublished: true
+        categoryId: 1
+        instructorId: 1
+    CoursePatch:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        year:
+          type: integer
+          format: int32
+          minimum: 1900
+          maximum: 2027
+        durationMin:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          pattern: \S
+          nullable: true
+        isPublished:
+          type: boolean
+          default: true
+        categoryId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        instructorId:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+          nullable: true
+      additionalProperties: false
+      minProperties: 1
+      example:
+        description: null
+        isPublished: false
+    LessonCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        rating:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          pattern: \S
+          nullable: true
+        authorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+      required:
+        - title
+        - rating
+        - authorName
+      additionalProperties: false
+      example:
+        title: Хувьсагч ба өгөгдлийн төрөл
+        rating: 5
+        comment: Эхний хичээлийн материал.
+        authorName: Б. Тэмүүлэн
+    LessonPatch:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+        rating:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          pattern: \S
+          nullable: true
+        authorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: \S
+      additionalProperties: false
+      minProperties: 1
+      example:
+        rating: 4
+        comment: Материалыг шинэчлэв.
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Хуудасны дугаар. page болон limit-ийн үржвэр int32 хязгаараас хэтэрч болохгүй.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 2147483647
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      description: Нэг хуудасны хэмжээ.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 50
+        default: 10
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Эерэг бүхэл int32 ID. Тоо биш бол 400.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 2147483647
+      example: 1
