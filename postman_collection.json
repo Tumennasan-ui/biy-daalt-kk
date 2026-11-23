@@ -1,0 +1,2981 @@
+{
+  "info": {
+    "name": "BED411 Онлайн сургалтын API - бүрэн шалгалт",
+    "_postman_id": "1cd2c96b-47a3-4d42-a0e2-a5fe62e69bd1",
+    "description": "100 дараалсан хүсэлт, 66 алдааны тохиолдол. Collection Runner дээр дээрээс доош ажиллуул. Өөрийн fixture өгөгдлийг үүсгэж ID-г collection variables-д хадгална; seed ID таахгүй. Төгсгөлд fixture өгөгдлөө цэвэрлэнэ. Эхний health хүсэлт runSuffix-ийг шинэчилнэ. Сервер болон PostgreSQL ажиллаж байх ёстой. baseUrl-ийг өөрчилж болно.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "runSuffix",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "emptyCategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "instructorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orphanCourseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondLessonId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Серверийн health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Серверийн health"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"runSuffix\", Date.now().toString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"status ok\", () => pm.expect(pm.response.json().status).to.eql(\"ok\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Үл мэдэгдэх хаяг",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/not-a-real-route",
+        "description": "Үл мэдэгдэх хаяг"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Ангилал нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Ангилал нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"categoryId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Хоосон ангилал нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Хоосон ангилал нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Empty {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"emptyCategoryId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Давхардсан ангилал",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Давхардсан ангилал",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Ангиллын нэр зайтай",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Ангиллын нэр зайтай",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"   \"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Ангилалд id оруулах",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Ангилалд id оруулах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Invalid\",\n  \"id\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Багш нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/instructors",
+        "description": "Багш нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Teacher {{runSuffix}}\",\n  \"birthYear\": 1990\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"instructorId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Багшийн буруу он",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/instructors",
+        "description": "Багшийн буруу он",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Invalid\",\n  \"birthYear\": 1800\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Багшийн нэр хоосон",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/instructors",
+        "description": "Багшийн нэр хоосон",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Сургалт нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалт нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Postman JavaScript {{runSuffix}}\",\"year\":2026,\"durationMin\":120,\"description\":\"JavaScript basics\",\"isPublished\":true,\"categoryId\":{{categoryId}},\"instructorId\":{{instructorId}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"courseId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Багшгүй сургалт нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Багшгүй сургалт нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Postman No Teacher {{runSuffix}}\",\"year\":2025,\"durationMin\":60,\"categoryId\":{{categoryId}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"orphanCourseId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Сургалтын буруу categoryId",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалтын буруу categoryId",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Invalid\",\n  \"year\": 2026,\n  \"durationMin\": 10,\n  \"categoryId\": 2147483647\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Сургалтын буруу instructorId",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалтын буруу instructorId",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Invalid\",\"year\":2026,\"durationMin\":10,\"categoryId\":{{categoryId}},\"instructorId\":2147483647}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Сургалтын буруу year",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалтын буруу year",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Invalid\",\"year\":1800,\"durationMin\":10,\"categoryId\":{{categoryId}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Сургалтын durationMin тэг",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалтын durationMin тэг",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Invalid\",\"year\":2026,\"durationMin\":0,\"categoryId\":{{categoryId}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Сургалтын boolean мөр байх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалтын boolean мөр байх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Invalid\",\"year\":2026,\"durationMin\":10,\"categoryId\":{{categoryId}},\"isPublished\":\"true\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Сургалтын createdAt хориглох",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses",
+        "description": "Сургалтын createdAt хориглох",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Invalid\",\"year\":2026,\"durationMin\":10,\"categoryId\":{{categoryId}},\"createdAt\":\"2026-01-01\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Ангиллууд жагсаах",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/categories?page=1&limit=5",
+        "description": "Ангиллууд жагсаах"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. Багш нар жагсаах",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/instructors?page=1&limit=5",
+        "description": "Багш нар жагсаах"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Ангилал дэлгэрэнгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/categories/{{categoryId}}",
+        "description": "Ангилал дэлгэрэнгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Сургалтын тоо\", () => pm.expect(pm.response.json()._count.courses).to.eql(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22. Багш дэлгэрэнгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/{{instructorId}}",
+        "description": "Багш дэлгэрэнгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Сургалтын тоо\", () => pm.expect(pm.response.json()._count.courses).to.eql(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23. Ангилал хэсэгчлэн засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories/{{emptyCategoryId}}",
+        "description": "Ангилал хэсэгчлэн засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Empty renamed {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24. Ангилал давхардсан нэрээр засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories/{{emptyCategoryId}}",
+        "description": "Ангилал давхардсан нэрээр засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25. Багш хэсэгчлэн засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/instructors/{{instructorId}}",
+        "description": "Багш хэсэгчлэн засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"birthYear\": 1991\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26. Сургалт хэсэгчлэн засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Сургалт хэсэгчлэн засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Updated JavaScript description\",\n  \"durationMin\": 135\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27. Сургалтын хоосон PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Сургалтын хоосон PATCH",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28. Сургалтын хориглосон PATCH талбар",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Сургалтын хориглосон PATCH талбар",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29. Сургалтууд жагсаах",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?page=1&limit=10",
+        "description": "Сургалтууд жагсаах"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "30. Сургалтын нийлмэл шүүлтүүр",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?q=javascript&categoryId={{categoryId}}&instructorId={{instructorId}}&hasInstructor=true&minYear=2020&maxYear=2027&isPublished=true&sort=year&order=asc&page=1&limit=20",
+        "description": "Сургалтын нийлмэл шүүлтүүр"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });",
+              "pm.test(\"Шүүлтүүрийн total\", () => pm.expect(pm.response.json().meta.total).to.eql(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "31. Багшгүй сургалтын шүүлтүүр",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?categoryId={{categoryId}}&hasInstructor=false",
+        "description": "Багшгүй сургалтын шүүлтүүр"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Багшгүй сургалт\", () => {const b=pm.response.json(); pm.expect(b.meta.total).to.eql(1); pm.expect(b.data[0].instructorId).to.eql(null);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "32. Ангиллын сургалтууд",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/categories/{{categoryId}}/courses?sort=title&order=asc&page=1&limit=5",
+        "description": "Ангиллын сургалтууд"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "33. Багшийн сургалтууд",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/{{instructorId}}/courses?page=1&limit=5",
+        "description": "Багшийн сургалтууд"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "34. Сургалт дэлгэрэнгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Сургалт дэлгэрэнгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Холбоос болон дундаж\", () => {const b=pm.response.json(); pm.expect(b.category.id).to.eql(Number(pm.collectionVariables.get(\"categoryId\"))); pm.expect(b).to.have.property(\"instructor\"); pm.expect(b).to.have.property(\"averageRating\",null);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "35. Хичээл нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons",
+        "description": "Хичээл нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Variables\",\n  \"rating\": 5,\n  \"comment\": \"First lesson\",\n  \"authorName\": \"Author A {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"lessonId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "36. Хоёр дахь хичээл нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons",
+        "description": "Хоёр дахь хичээл нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Functions\",\n  \"rating\": 3,\n  \"authorName\": \"Author B {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"secondLessonId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "37. Давхардсан authorName",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons",
+        "description": "Давхардсан authorName",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Duplicate\",\n  \"rating\": 5,\n  \"authorName\": \"Author A {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "38. Хичээлийн rating 7",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons",
+        "description": "Хичээлийн rating 7",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Invalid\",\n  \"rating\": 7,\n  \"authorName\": \"Invalid\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "39. Хичээлийн rating бутархай",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons",
+        "description": "Хичээлийн rating бутархай",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Invalid\",\n  \"rating\": 2.5,\n  \"authorName\": \"Invalid\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "40. Хичээлийн authorName зайтай",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons",
+        "description": "Хичээлийн authorName зайтай",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Invalid\",\n  \"rating\": 3,\n  \"authorName\": \"   \"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "41. Хичээлүүд rating-аар эрэмбэлэх",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons?sort=rating&order=asc&page=1&limit=10",
+        "description": "Хичээлүүд rating-аар эрэмбэлэх"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });",
+              "pm.test(\"Үнэлгээний өсөх эрэмбэ\", () => pm.expect(pm.response.json().data.map(v=>v.rating)).to.eql([3,5]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "42. Хичээлүүд createdAt-аар эрэмбэлэх",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons?sort=createdAt&order=desc",
+        "description": "Хичээлүүд createdAt-аар эрэмбэлэх"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"data/meta хуудаслалт\", function () { const b = pm.response.json(); pm.expect(b.data).to.be.an(\"array\"); for (const k of [\"page\", \"limit\", \"total\", \"pages\"]) pm.expect(b.meta[k]).to.be.a(\"number\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "43. Дундаж үнэлгээ",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Дундаж үнэлгээ"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Дундаж 4\", () => pm.expect(pm.response.json().averageRating).to.eql(4));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "44. Дундаж үнэлгээгээр шүүх",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?categoryId={{categoryId}}&minRating=4",
+        "description": "Дундаж үнэлгээгээр шүүх"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Зөвхөн үнэлгээтэй сургалт\", () => pm.expect(pm.response.json().meta.total).to.eql(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "45. Хичээл хэсэгчлэн засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/lessons/{{lessonId}}",
+        "description": "Хичээл хэсэгчлэн засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Variables updated\",\n  \"comment\": null,\n  \"rating\": 4\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "46. Хичээлийн authorName давхардуулах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/lessons/{{secondLessonId}}",
+        "description": "Хичээлийн authorName давхардуулах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"authorName\": \"Author A {{runSuffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "47. Хичээлийн буруу rating PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/lessons/{{lessonId}}",
+        "description": "Хичээлийн буруу rating PATCH",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "48. Хичээлийн үл мэдэгдэх талбар",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/lessons/{{lessonId}}",
+        "description": "Хичээлийн үл мэдэгдэх талбар",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"courseId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "49. ID тоо биш",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/abc",
+        "description": "ID тоо биш"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "50. ID сөрөг",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/-1",
+        "description": "ID сөрөг"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "51. ID бутархай",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/1.2",
+        "description": "ID бутархай"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "52. page тэг",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?page=0",
+        "description": "page тэг"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "53. limit хэт их",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?limit=100",
+        "description": "limit хэт их"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "54. page тоо биш",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?page=abc",
+        "description": "page тоо биш"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "55. sort зөвшөөрөгдөөгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?sort=password",
+        "description": "sort зөвшөөрөгдөөгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "56. order буруу",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?order=up",
+        "description": "order буруу"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "57. minYear maxYear-аас их",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?minYear=2020&maxYear=2000",
+        "description": "minYear maxYear-аас их"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "58. isPublished буруу",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?isPublished=yes",
+        "description": "isPublished буруу"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "59. hasInstructor буруу",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?hasInstructor=1",
+        "description": "hasInstructor буруу"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "60. categoryId тоо биш",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?categoryId=x",
+        "description": "categoryId тоо биш"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "61. instructorId тоо биш",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?instructorId=x",
+        "description": "instructorId тоо биш"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "62. minRating хэт их",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?minRating=6",
+        "description": "minRating хэт их"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "63. үл мэдэгдэх query",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?password=secret",
+        "description": "үл мэдэгдэх query"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "64. давтагдсан query",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?page=1&page=2",
+        "description": "давтагдсан query"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "65. хоосон q",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses?q=%20%20",
+        "description": "хоосон q"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "66. Ангиллын буруу хуудаслалт",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/categories?limit=0",
+        "description": "Ангиллын буруу хуудаслалт"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "67. Багшийн буруу хуудаслалт",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/instructors?page=-1",
+        "description": "Багшийн буруу хуудаслалт"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "68. Хичээлийн буруу sort",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}/lessons?sort=title",
+        "description": "Хичээлийн буруу sort"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "69. Ангилал олдохгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/categories/2147483647",
+        "description": "Ангилал олдохгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "70. Багш олдохгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/2147483647",
+        "description": "Багш олдохгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "71. Сургалт олдохгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/2147483647",
+        "description": "Сургалт олдохгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "72. Ангиллын сургалтын parent олдохгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/categories/2147483647/courses",
+        "description": "Ангиллын сургалтын parent олдохгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "73. Багшийн сургалтын parent олдохгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/2147483647/courses",
+        "description": "Багшийн сургалтын parent олдохгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "74. Хичээлийн parent олдохгүй",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/2147483647/lessons",
+        "description": "Хичээлийн parent олдохгүй"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "75. Олдохгүй сургалтад хичээл нэмэх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/2147483647/lessons",
+        "description": "Олдохгүй сургалтад хичээл нэмэх",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Missing\",\n  \"rating\": 3,\n  \"authorName\": \"Missing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "76. Олдохгүй ангилал засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories/2147483647",
+        "description": "Олдохгүй ангилал засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Missing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "77. Олдохгүй багш засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/instructors/2147483647",
+        "description": "Олдохгүй багш засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Missing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "78. Олдохгүй сургалт засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses/2147483647",
+        "description": "Олдохгүй сургалт засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Missing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "79. Олдохгүй хичээл засах",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/lessons/2147483647",
+        "description": "Олдохгүй хичээл засах",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "80. Холбоотой ангилал устгахыг хориглох",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/categories/{{categoryId}}",
+        "description": "Холбоотой ангилал устгахыг хориглох"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "81. Багш устгах SetNull",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/{{instructorId}}",
+        "description": "Багш устгах SetNull"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "82. Багш устсан ч сургалт үлдэх",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Багш устсан ч сургалт үлдэх"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"SetNull\", () => {const b=pm.response.json(); pm.expect(b.instructorId).to.eql(null); pm.expect(b.instructor).to.eql(null);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "83. Хичээл устгах",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/lessons/{{secondLessonId}}",
+        "description": "Хичээл устгах"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "84. Устгасан хичээл дахин устгах",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/lessons/{{secondLessonId}}",
+        "description": "Устгасан хичээл дахин устгах"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "85. Сургалт устгах Cascade",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{courseId}}",
+        "description": "Сургалт устгах Cascade"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "86. Cascade-аар хичээл устсан",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/lessons/{{lessonId}}",
+        "description": "Cascade-аар хичээл устсан",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "87. Багшгүй сургалт цэвэрлэх",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/courses/{{orphanCourseId}}",
+        "description": "Багшгүй сургалт цэвэрлэх"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "88. Хоосон болсон ангилал устгах",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/categories/{{categoryId}}",
+        "description": "Хоосон болсон ангилал устгах"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "89. Нөөц ангилал цэвэрлэх",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/categories/{{emptyCategoryId}}",
+        "description": "Нөөц ангилал цэвэрлэх"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "90. categories олдохгүй устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/categories/2147483647",
+        "description": "categories олдохгүй устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "91. categories буруу ID устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/categories/abc",
+        "description": "categories буруу ID устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "92. instructors олдохгүй устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/2147483647",
+        "description": "instructors олдохгүй устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "93. instructors буруу ID устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/instructors/abc",
+        "description": "instructors буруу ID устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "94. courses олдохгүй устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/courses/2147483647",
+        "description": "courses олдохгүй устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "95. courses буруу ID устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/courses/abc",
+        "description": "courses буруу ID устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "96. lessons олдохгүй устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/lessons/2147483647",
+        "description": "lessons олдохгүй устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "97. lessons буруу ID устгал",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/lessons/abc",
+        "description": "lessons буруу ID устгал"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "98. Буруу JSON",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Буруу JSON",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "99. Body массив байх",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "description": "Body массив байх",
+        "body": {
+          "mode": "raw",
+          "raw": "[]",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Нэг хэлбэрийн алдаа\", function () {",
+              "  const value = pm.response.json();",
+              "  pm.expect(value.message).to.be.a(\"string\");",
+              "  pm.expect(Object.keys(value).every(k => [\"message\", \"field\"].includes(k))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "100. Эцсийн health шалгалт",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Эцсийн health шалгалт"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
