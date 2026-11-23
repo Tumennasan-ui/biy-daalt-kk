@@ -1,0 +1,12 @@
+const router = require('express').Router();
+const c = require('../controllers/courses');
+const lessons = require('../controllers/lessons');
+const validate = require('../middleware/validate');
+router.get('/', c.list);
+router.get('/:id/lessons', lessons.list);
+router.post('/:id/lessons', validate('lesson'), lessons.create);
+router.get('/:id', c.detail);
+router.post('/', validate('course'), c.create);
+router.patch('/:id', validate('course', true), c.update);
+router.delete('/:id', c.remove);
+module.exports = router;
