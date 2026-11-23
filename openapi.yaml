@@ -382,7 +382,7 @@ paths:
           schema:
             type: string
             minLength: 1
-            maxLength: 200
+            maxLength: 500
             pattern: \S
           description: title эсвэл description дотор хайна. Үсгийн том, жижиг ялгахгүй.
           example: javascript
@@ -626,7 +626,7 @@ paths:
           schema:
             type: string
             minLength: 1
-            maxLength: 200
+            maxLength: 500
             pattern: \S
           description: title эсвэл description дотор хайна. Үсгийн том, жижиг ялгахгүй.
           example: javascript
@@ -734,7 +734,7 @@ paths:
           schema:
             type: string
             minLength: 1
-            maxLength: 200
+            maxLength: 500
             pattern: \S
           description: title эсвэл description дотор хайна. Үсгийн том, жижиг ялгахгүй.
           example: javascript
@@ -1008,7 +1008,7 @@ components:
         - createdAt
     Instructor:
       type: object
-      properties:
+      properties: &a1
         id:
           type: integer
           format: int32
@@ -1030,7 +1030,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-      required:
+      required: &a2
         - id
         - name
         - birthYear
@@ -1168,9 +1168,7 @@ components:
         category:
           $ref: "#/components/schemas/Category"
         instructor:
-          allOf:
-            - $ref: "#/components/schemas/Instructor"
-          nullable: true
+          $ref: "#/components/schemas/NullableInstructor"
         _count:
           type: object
           properties:
@@ -1504,11 +1502,16 @@ components:
       example:
         rating: 4
         comment: Материалыг шинэчлэв.
+    NullableInstructor:
+      type: object
+      properties: *a1
+      required: *a2
+      nullable: true
   parameters:
     Page:
       name: page
       in: query
-      description: Хуудасны дугаар. page болон limit-ийн үржвэр int32 хязгаараас хэтэрч болохгүй.
+      description: Хуудасны дугаар. (page - 1) * limit утга int32 хязгаараас хэтэрч болохгүй.
       schema:
         type: integer
         format: int32

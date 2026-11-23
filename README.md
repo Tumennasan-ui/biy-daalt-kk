@@ -36,6 +36,8 @@ BED411 Backend хөгжүүлэлт хичээлийн бие даалт. Оюу
 - PostgreSQL 18, эсвэл Docker Desktop / Docker Compose.
 - Git.
 
+Ажиллуулж шалгасан орчин: Node.js 22.20.0, PostgreSQL 18.1. npm сангуудын хувилбар `package-lock.json`-д түгжигдсэн.
+
 ### A. Docker-оор PostgreSQL асаах
 
 Төслийн хавтас дотроос:
@@ -69,7 +71,7 @@ DATABASE_URL="postgresql://learning:learning_local@localhost:5432/online_learnin
 PORT=3000
 ```
 
-`learning_local` нь зөвхөн локал хөгжүүлэлтийн жишээ нууц үг. Өөр орчинд URL болон нууц үгээ `.env` дотроо тохируулна. PostgreSQL-ийн 5432 порт ашиглагдаж байвал `.env` дотор `PG_PORT=5433` гэж нэмж, `DATABASE_URL`-ийн портыг мөн 5433 болгоно.
+`learning_local` нь зөвхөн локал хөгжүүлэлтийн жишээ нууц үг. Өөр орчинд URL болон нууц үгээ `.env` дотроо тохируулна. PostgreSQL-ийн 5432 порт ашиглагдаж байвал `.env` дотор `PG_PORT=5433` гэж нэмж, `DATABASE_URL` болон `TEST_DATABASE_URL`-ийн портыг мөн 5433 болгоно. `PG_PORT` нь зөвхөн Docker-ийн гаднаас хандах портыг тохируулна; Prisma холболтын URL-ийн портыг автоматаар солихгүй.
 
 ### B. Компьютерт PostgreSQL суусан бол
 
@@ -253,11 +255,17 @@ Seed нь ангиллын unique нэр, багшийн нэр, курсын н
 
 `/docs` дээр Category, Instructor, Course, Lesson гэсэн дөрвөн бүлэг байна. `Try it out`-аар body болон query-гаа оруулан хүсэлт явуулна. `openapi.yaml`-д schema, requestBody, амжилтын болон алдааны response-ууд бий. `page`, `limit`-ийг components.parameters-аас `$ref`-ээр ашиглана.
 
+OpenAPI бүтцийг шалгах:
+
+```sh
+npm run check:openapi
+```
+
 ### Postman
 
-1. `postman_collection.json`-ийг Postman-д import хийнэ.
+1. `postman_collection.json`-ийг Postman Desktop-д import хийнэ.
 2. Collection variable `baseUrl`-ийг `http://localhost:3000` болгоно.
-3. Collection Runner-оор бүх хүсэлтийг дарааллаар ажиллуулна.
+3. Collection Runner-оор **100 хүсэлтийг** дарааллаар ажиллуулна.
 4. Collection өөрийн demo бичлэгүүдийг үүсгэж, ID-уудыг response-оос хадгалдаг. 400, 404, 409 болон устгалтын дүрмүүдийг шалгах хүсэлтүүд багтсан.
 
 ### Автомат integration test
@@ -277,9 +285,13 @@ TEST_DATABASE_URL="postgresql://learning:learning_local@localhost:5432/online_le
 Test database-д migration-аа нэг удаа хэрэглэнэ. PowerShell дээр доорх URL-ийг өөрийн `TEST_DATABASE_URL`-ийн утгатай тааруулна:
 
 ```powershell
-$env:DATABASE_URL = 'postgresql://learning:learning_local@localhost:5432/online_learning_test?schema=public'
-npm run db:deploy
-Remove-Item Env:DATABASE_URL
+$savedDatabaseUrl = $env:DATABASE_URL
+try {
+  $env:DATABASE_URL = 'postgresql://learning:learning_local@localhost:5432/online_learning_test?schema=public'
+  npm run db:deploy
+} finally {
+  $env:DATABASE_URL = $savedDatabaseUrl
+}
 npm test
 ```
 

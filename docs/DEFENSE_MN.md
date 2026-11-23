@@ -8,7 +8,7 @@
 2. `npm ci`, `npm run prisma:generate`, `npm run db:deploy`, `npm run seed`, `npm start` командуудаар асааж чаддаг болно.
 3. `/docs`, `/health`, `/courses`-ийг нээж шалгана.
 4. Seed-ийг хоёр удаа ажиллуулж, шинэ database-д 5 ангилал, 6 багш, 25 курс, 60 хичээл хэвээр байгааг батална.
-5. Postman collection-ийг бүхэлд нь ажиллуулж, алдаатай тохиолдлын хариуг уншина.
+5. Postman Desktop-д collection-ийг import хийгээд Runner-оор 100 хүсэлтийг дарааллаар ажиллуулж, алдаатай тохиолдлын хариуг уншина. `npm run check:openapi` болон тусдаа test database-д `npm test` ажиллуулна.
 6. `git log --oneline`, `git status`-ийг үзнэ. `.env` болон `node_modules` tracking-д ороогүй байна.
 
 Эхэлж хэлэх тайлбар:
@@ -181,7 +181,7 @@ URL query нь string ирдэг. JavaScript-ийн `Boolean('false')` нь true
 
 **Prisma алдаа хаана HTTP status болдог вэ?**
 
-`errorHandler.js` дотор. P2002 → 409, P2003 → foreign key-ийн нөхцөлөөс 400/409, P2025 → 404. Controller дотор Prisma error code-ийг тус тусад нь шалгадаггүй. Гэнэтийн алдаанд 500 ба ерөнхий message өгнө.
+`errorHandler.js` дотор. P2002 → 409, P2003 → foreign key-ийн нөхцөлөөс 400/409, P2025 → 404. PostgreSQL 18 нь Restrict зөрчилд SQLSTATE 23001 өгөхөд Prisma 6 заримдаа unknown request error болгодог тул DELETE-ийн энэ тохиолдлыг мөн энд 409 болгон хувиргадаг. Controller дотор Prisma error code-ийг тус тусад нь шалгадаггүй. Гэнэтийн алдаанд 500 ба ерөнхий message өгнө.
 
 **Ямар ч body server-ийг унагаахгүй гэдгийг яаж хангах вэ?**
 
@@ -193,7 +193,7 @@ Category-г unique нэрээр upsert хийнэ. Instructor ба Course-ийн
 
 **Average rating болон minRating юу боддог вэ?**
 
-Тухайн курсын Lesson.rating-уудын арифметик дундаж. Detail нь averageRating өгдөг. MinRating шүүлтүүр нь дундаж нь босгоос багагүй course-уудыг үлдээнэ. Хичээлгүй курс averageRating null тул minRating шүүлтүүрт орохгүй.
+Тухайн курсын Lesson.rating-уудын арифметик дундаж. Detail нь averageRating өгдөг. MinRating шүүлтүүр нь Prisma `lesson.groupBy` болон `_avg` / `having` ашиглан database дээр дундаж нь босгоос багагүй course ID-уудыг олдог. Үүнийг pagination хийхээс өмнө where нөхцөлд нэмдэг тул total зөв байдаг. Хичээлгүй курс averageRating null тул minRating шүүлтүүрт орохгүй. Жагсаалтын data ба total нь RepeatableRead transaction дотор ижил database snapshot-оос уншигдана.
 
 ## 4. Сүүлийн 3 минут: шинэ query нэмэх дасгал
 
