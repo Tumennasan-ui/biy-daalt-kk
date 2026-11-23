@@ -424,3 +424,30 @@ test('malformed JSON, primitive JSON and oversized requests return errors while 
   assert.equal(healthy.status, 200);
   assert.deepEqual(healthy.body, { status: 'ok' });
 });
+
+test('course substring search treats percent, underscore and backslash as literal characters', async () => {
+  const categoryId = fixture.category.id;
+  await prisma.course.createMany({ data: [
+    { title: 'Percent 100% Ready', description: 'Literal signs', year: 2024, durationMin: 30, categoryId },
+    { title: 'Under_score Search', description: 'Literal identifiers', year: 2024, durationMin: 30, categoryId },
+    { title: 'Windows Path', description: 'Assets live at C:\\lessons', year: 2024, durationMin: 30, categoryId },
+    { title: 'Ordinary Percent Word', description: 'A plain course without wildcard symbols', year: 2024, durationMin: 30, categoryId },
+  ] });
+  const cases = [
+    ['%', ['Percent 100% Ready']],
+    ['_', ['Under_score Search']],
+    ['\\', ['Windows Path']],
+    ['100%', ['Percent 100% Ready']],
+    ['UNDER_SCORE', ['Under_score Search']],
+    ['C:\\lesson', ['Windows Path']],
+    ['aSSETs', ['Windows Path']],
+    ['PERCENT', ['Ordinary Percent Word', 'Percent 100% Ready']],
+    ['_%', []],
+    ['\\%', []],
+  ];
+  for (const [q, titles] of cases) {
+    const response = await api.get('/courses').query({ q, sort: 'title', order: 'asc' });
+    checkPage(response, titles.length);
+    assert.deepEqual(response.body.data.map((course) => course.title), titles, `literal substring: ${q}`);
+  }
+});

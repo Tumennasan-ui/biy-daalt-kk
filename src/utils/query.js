@@ -41,7 +41,9 @@ function courseQuery(query) {
   const where = {};
   if (query.q !== undefined) {
     if (!query.q.trim() || query.q.length > 500) throw new HttpError(400, 'Хайлтын текст хоосон эсвэл хэт урт байна.', 'q');
-    where.OR = ['title', 'description'].map(field => ({ [field]: { contains: query.q.trim(), mode: 'insensitive' } }));
+    // Prisma contains uses SQL LIKE: escape metacharacters for literal text search.
+    const needle = query.q.trim().replace(/[\\%_]/g, '\\$&');
+    where.OR = ['title', 'description'].map(field => ({ [field]: { contains: needle, mode: 'insensitive' } }));
   }
   if (query.categoryId !== undefined) where.categoryId = id(query.categoryId, 'categoryId');
   if (query.instructorId !== undefined) where.instructorId = id(query.instructorId, 'instructorId');
