@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(200)
+  createdAt DateTime @default(now())
+  courses   Course[]
+}
+
+model Instructor {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  birthYear Int?
+  createdAt DateTime @default(now())
+  courses   Course[]
+}
+
+model Course {
+  id           Int         @id @default(autoincrement())
+  title        String      @db.VarChar(200)
+  year         Int
+  durationMin  Int
+  description  String?     @db.VarChar(5000)
+  isPublished  Boolean     @default(true)
+  categoryId   Int
+  instructorId Int?
+  createdAt    DateTime    @default(now())
+  category     Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  instructor   Instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  lessons      Lesson[]
+
+  @@index([categoryId])
+  @@index([instructorId])
+  @@index([year])
+}
+
+model Lesson {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(200)
+  rating     Int
+  comment    String?  @db.VarChar(2000)
+  authorName String   @db.VarChar(200)
+  courseId   Int
+  createdAt  DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, authorName])
+}
