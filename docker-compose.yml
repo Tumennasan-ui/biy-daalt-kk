@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: learning
+      POSTGRES_PASSWORD: learning_local
+      POSTGRES_DB: online_learning
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - learning_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U learning -d online_learning"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  learning_pgdata:
