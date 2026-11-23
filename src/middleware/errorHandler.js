@@ -27,6 +27,11 @@ module.exports = function errorHandler(err, req, res, next) {
       case 'P2020': case 'P2000': status = 400; message = 'Талбарын утга зөвшөөрсөн хязгаараас хэтэрсэн.'; break;
       default: status = 500; break;
     }
+  } else if (err instanceof Prisma.PrismaClientUnknownRequestError &&
+    req.method === 'DELETE' && /code: "23001"/.test(err.message)) {
+    // PostgreSQL 18 emits restrict_violation (23001); Prisma 6 does not
+    // classify that SQLSTATE as P2003. Keep this compatibility mapping here.
+    status = 409; message = 'Сургалттай ангиллыг устгах боломжгүй.'; field = undefined;
   } else if (err.type === 'entity.parse.failed' || err instanceof URIError) {
     status = 400; message = 'JSON эсвэл URL-ийн бүтэц буруу.'; field = undefined;
   } else if (err.type === 'entity.too.large') {
