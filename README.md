@@ -386,3 +386,5 @@ git push -u origin main
 - [Prisma compound unique](https://www.prisma.io/docs/orm/prisma-client/special-fields-and-types/working-with-composite-ids-and-constraints)
 - [PostgreSQL constraints](https://www.postgresql.org/docs/18/ddl-constraints.html)
 - [OpenAPI 3.0 specification](https://spec.openapis.org/oas/v3.0.3.html)
+#   b i y - d a a l t - k k  
+ 
